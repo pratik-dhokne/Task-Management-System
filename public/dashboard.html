@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Task Dashboard</h1>
+        <a href="/create_task.html" class="btn">Create New Task</a>
+        <a href="/logout" class="btn">Logout</a>
+        <h2>Your Tasks</h2>
+        <table id="tasks">
+            <!-- Task rows will be populated here via JavaScript -->
+        </table>
+    </div>
+
+    <script>
+        fetch('/tasks')
+        .then(response => response.json())
+        .then(tasks => {
+            const tasksTable = document.getElementById('tasks');
+            tasksTable.innerHTML = `
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            `;
+            tasks.forEach(task => {
+                const row = `
+                    <tr>
+                        <td>${task.title}</td>
+                        <td>${task.description}</td>
+                        <td>${task.due_date}</td>
+                        <td>${task.status}</td>
+                        <td>
+                            <form action="/tasks/update/${task.task_id}" method="POST">
+                                <button type="submit">Update</button>
+                            </form>
+                            <form action="/tasks/delete/${task.task_id}" method="POST">
+                                <button type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                `;
+                tasksTable.innerHTML += row;
+            });
+        });
+    </script>
+</body>
+</html>
