@@ -16,7 +16,36 @@
         </table>
     </div>
 
+    <!-- Update Task Modal -->
+    <div id="updateModal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Update Task</h2>
+            <form id="updateTaskForm" method="POST">
+                <label for="updateTitle">Title:</label>
+                <input type="text" id="updateTitle" name="title" required>
+
+                <label for="updateDescription">Description:</label>
+                <textarea id="updateDescription" name="description"></textarea>
+
+                <label for="updateDueDate">Due Date:</label>
+                <input type="date" id="updateDueDate" name="due_date">
+
+                <label for="updateStatus">Status:</label>
+                <select id="updateStatus" name="status">
+                    <option value="To Do">To Do</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                </select>
+
+                <input type="hidden" id="updateTaskId" name="task_id">
+                <button type="submit">Update Task</button>
+            </form>
+        </div>
+    </div>
+
     <script>
+        // Fetch and display tasks
         fetch('/tasks')
         .then(response => response.json())
         .then(tasks => {
@@ -38,10 +67,8 @@
                         <td>${task.due_date}</td>
                         <td>${task.status}</td>
                         <td>
-                            <form action="/tasks/update/${task.task_id}" method="POST">
-                                <button type="submit">Update</button>
-                            </form>
-                            <form action="/tasks/delete/${task.task_id}" method="POST">
+                            <button onclick="openModal(${task.task_id}, '${task.title}', '${task.description}', '${task.due_date}', '${task.status}')">Update</button>
+                            <form action="/tasks/delete/${task.task_id}" method="POST" style="display:inline;">
                                 <button type="submit">Delete</button>
                             </form>
                         </td>
@@ -50,6 +77,36 @@
                 tasksTable.innerHTML += row;
             });
         });
+
+        // Open modal for updating task
+        function openModal(taskId, title, description, dueDate, status) {
+            document.getElementById('updateTaskId').value = taskId;
+            document.getElementById('updateTitle').value = title;
+            document.getElementById('updateDescription').value = description;
+            document.getElementById('updateDueDate').value = dueDate;
+            document.getElementById('updateStatus').value = status;
+            document.getElementById('updateModal').style.display = 'block';
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('updateModal').style.display = 'none';
+        }
+
+        // Handle the update form submission
+        document.getElementById('updateTaskForm').onsubmit = function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const taskId = formData.get('task_id');
+            fetch(`/tasks/update/${taskId}`, {
+                method: 'POST',
+                body: formData,
+            }).then(response => {
+                if (response.ok) {
+                    location.reload();
+                }
+            });
+        };
     </script>
 </body>
 </html>
